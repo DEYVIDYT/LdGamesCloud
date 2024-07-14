@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fontes da Comunidade - LDGames</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #4a90e2;
+            color: white;
+            padding: 10px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        header h1 {
+            text-align: center;
+            margin: 0;
+        }
+        #search-container {
+            text-align: center;
+            margin: 20px 0;
+            padding-top: 70px; /* For spacing under fixed header */
+        }
+        #search-input {
+            padding: 10px;
+            width: 50%;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+        #search-input:focus {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            outline: none;
+        }
+        .container {
+            margin-top: 80px;
+            padding: 0 20px;
+        }
+        .source {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .source:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+        }
+        .source h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+            color: #333;
+        }
+        .source p {
+            margin: 0 0 20px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+        .copy-btn {
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        .copy-btn:hover {
+            background-color: #357ab8;
+        }
+        .copy-btn:active {
+            background-color: #2c6291;
+        }
+        #add-source-btn {
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #add-source-btn:hover {
+            background-color: #357ab8;
+        }
+        #add-source-btn:active {
+            background-color: #2c6291;
+        }
+        #dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+        }
+        #dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+        }
+        #dialog h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        #dialog p {
+            margin: 10px 0 20px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+        #dialog .dialog-btn {
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+        }
+        #dialog .dialog-btn:hover {
+            background-color: #357ab8;
+        }
+        #dialog .dialog-btn:active {
+            background-color: #2c6291;
+        }
+        #dialog .close-btn {
+            background-color: #e74c3c;
+        }
+        #dialog .close-btn:hover {
+            background-color: #c0392b;
+        }
+        #dialog .close-btn:active {
+            background-color: #a93226;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Fontes da Comunidade - LDGames</h1>
+</header>
+
+<div class="container">
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Pesquisar fontes por nome...">
+    </div>
+
+    <button id="add-source-btn">Adicionar Fonte</button>
+
+    <div id="sources-container"></div>
+
+    <div id="dialog-overlay"></div>
+    <div id="dialog">
+        <h3>Adicionar Fonte</h3>
+        <p>Eu não sou responsável por qualquer conteúdo adicionado pelos usuários. Para adicionar uma fonte, informe a URL no grupo do whatsapp.</p>
+        <button class="dialog-btn" onclick="window.location.href='https://chat.whatsapp.com/CXSrf49mzhXEKQsJzxvZ8H'">Ir para o WhatsApp</button>
+        <button class="dialog-btn close-btn" id="close-dialog-btn">Fechar</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sourcesContainer = document.getElementById('sources-container');
+        const searchInput = document.getElementById('search-input');
+        const addSourceBtn = document.getElementById('add-source-btn');
+        const dialog = document.getElementById('dialog');
+        const dialogOverlay = document.getElementById('dialog-overlay');
+        const closeDialogBtn = document.getElementById('close-dialog-btn');
+
+        // Exemplo de dados JSON (substitua pela URL do seu JSON)
+        const jsonUrl = 'https://raw.githubusercontent.com/DEYVIDYT/LdGames/main/Exemplo.json';
+
+        let sourcesData = [];
+
+        // Função para copiar o link
+        function copyToClipboard(link) {
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Link copiado para a área de transferência!');
+            }).catch(err => {
+                console.error('Erro ao copiar o link: ', err);
+            });
+        }
+
+        // Função para renderizar as fontes
+        function renderSources(data) {
+            sourcesContainer.innerHTML = '';
+            data.forEach(source => {
+                const sourceDiv = document.createElement('div');
+                sourceDiv.className = 'source';
+
+                const nameElement = document.createElement('h2');
+                nameElement.textContent = source.name;
+
+                const descriptionElement = document.createElement('p');
+                descriptionElement.textContent = source.description;
+
+                const copyButton = document.createElement('button');
+                copyButton.className = 'copy-btn';
+                copyButton.textContent = 'Copiar Link';
+                copyButton.addEventListener('click', () => copyToClipboard(source.link));
+
+                sourceDiv.appendChild(nameElement);
+                sourceDiv.appendChild(descriptionElement);
+                sourceDiv.appendChild(copyButton);
+
+                sourcesContainer.appendChild(sourceDiv);
+            });
+        }
+
+        // Carregar dados do JSON
+        fetch(jsonUrl)
+            .then(response => response.json())
+            .then(data => {
+                sourcesData = data;
+                renderSources(sourcesData);
+            })
+            .catch(error => console.error('Erro ao carregar os dados: ', error));
+
+        // Evento de input para pesquisa
+        searchInput.addEventListener('input', (event) => {
+            const query = event.target.value.toLowerCase();
+            const filteredData = sourcesData.filter(source => source.name.toLowerCase().includes(query));
+            renderSources(filteredData);
+        });
+
+        // Evento para abrir o diálogo
+        addSourceBtn.addEventListener('click', () => {
+            dialog.style.display = 'block';
+            dialogOverlay.style.display = 'block';
+        });
+
+        // Evento para fechar o diálogo
+        closeDialogBtn.addEventListener('click', () => {
+            dialog.style.display = 'none';
+            dialogOverlay.style.display = 'none';
+        });
+
+        // Fechar o diálogo ao clicar fora dele
+        dialogOverlay.addEventListener('click', () => {
+            dialog.style.display = 'none';
+            dialogOverlay.style.display = 'none';
+        });
+    });
+</script>
+
+</body>
+</html>
