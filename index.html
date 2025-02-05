@@ -1,281 +1,167 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fontes da Comunidade - LDGames</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: #4a90e2;
-            color: white;
-            padding: 10px 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-        header h1 {
-            text-align: center;
-            margin: 0;
-        }
-        #search-container {
-            text-align: center;
-            margin: 20px 0;
-            padding-top: 70px; /* For spacing under fixed header */
-        }
-        #search-input {
-            padding: 10px;
-            width: 50%;
-            font-size: 1em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
-        }
-        #search-input:focus {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            outline: none;
-        }
-        .container {
-            margin-top: 80px;
-            padding: 0 20px;
-        }
-        .source {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .source:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
-        }
-        .source h2 {
-            margin: 0 0 10px 0;
-            font-size: 1.5em;
-            color: #333;
-        }
-        .source p {
-            margin: 0 0 20px 0;
-            color: #666;
-            line-height: 1.6;
-        }
-        .copy-btn {
-            padding: 10px 20px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-        }
-        .copy-btn:hover {
-            background-color: #357ab8;
-        }
-        .copy-btn:active {
-            background-color: #2c6291;
-        }
-        #add-source-btn {
-            margin: 20px 0;
-            padding: 10px 20px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        #add-source-btn:hover {
-            background-color: #357ab8;
-        }
-        #add-source-btn:active {
-            background-color: #2c6291;
-        }
-        #dialog-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1500;
-        }
-        #dialog {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 2000;
-            max-width: 90%;
-            width: 400px;
-            text-align: center;
-        }
-        #dialog h3 {
-            margin-top: 0;
-            color: #333;
-        }
-        #dialog p {
-            margin: 10px 0 20px 0;
-            color: #666;
-            line-height: 1.6;
-        }
-        #dialog .dialog-btn {
-            padding: 10px 20px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-            margin-right: 10px;
-        }
-        #dialog .dialog-btn:hover {
-            background-color: #357ab8;
-        }
-        #dialog .dialog-btn:active {
-            background-color: #2c6291;
-        }
-        #dialog .close-btn {
-            background-color: #e74c3c;
-        }
-        #dialog .close-btn:hover {
-            background-color: #c0392b;
-        }
-        #dialog .close-btn:active {
-            background-color: #a93226;
-        }
-    </style>
+    <title>LdGames - Sua Biblioteca de Jogos</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="app-container">
+        <header>
+            <div class="header-content">
+                <div class="user-profile">
+                    <img src="https://raw.githubusercontent.com/DEYVIDYT/LdGames/refs/heads/main/Photos/Round%20Photo_Nov142024_143621.png" alt="LdGames Logo" class="avatar">
+                    <div class="user-info">
+                        <h2>LdGames</h2>
+                        <p>Sua biblioteca de jogos</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-<header>
-    <h1>Fontes da Comunidade - LDGames</h1>
-</header>
+        <div id="pageContainer">
+            <div id="homePage" class="page active">
+                <section class="featured-banner">
+                    <div id="featuredGame" class="featured-game">
+                        <!-- Featured game will be dynamically loaded here -->
+                    </div>
+                </section>
 
-<div class="container">
-    <div id="search-container">
-        <input type="text" id="search-input" placeholder="Pesquisar fontes por nome...">
+                <div class="search-container">
+                    <button class="search-btn" onclick="switchPage('search')"><i class="fas fa-search"></i></button>
+                </div>
+
+                <main id="mainContent">
+                    <div class="genre-container" id="genreContainer">
+                        <!-- Games will be dynamically loaded here -->
+                    </div>
+                </main>
+            </div>
+
+            <div id="searchPage" class="page">
+                <div class="search-header">
+                    <button class="back-button" onclick="switchPage('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2>Pesquisar Jogos</h2>
+                </div>
+                
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Pesquisar jogos...">
+                    <button class="search-btn" id="searchButton"><i class="fas fa-search"></i></button>
+                </div>
+
+                <div id="searchResults" class="search-results">
+                    <!-- Search results will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <div id="gameDetailsPage" class="page">
+                <div class="game-details-header">
+                    <button class="back-button" onclick="switchPage('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2 id="gameDetailsTitle">Detalhes do Jogo</h2>
+                </div>
+                <div id="gameDetailsContent" class="game-details-content">
+                    <!-- Game details will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <div id="configPage" class="page">
+                <div class="config-header">
+                    <button class="back-button" onclick="switchPage('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2>Configurações</h2>
+                </div>
+                
+                <div class="config-content">
+                    <div class="config-section">
+                        <h3>Configurações de Download</h3>
+                        <button class="config-download-btn" onclick="showDownloadSettings()">
+                            <i class="fas fa-download"></i>
+                            Configurações de Download
+                        </button>
+                    </div>
+                    
+                    <div class="config-section">
+                        <h3>Código Fonte</h3>
+                        <button class="config-download-btn" onclick="downloadSourceCode()">
+                            <i class="fab fa-github"></i>
+                            Baixar Código Fonte
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Início</span>
+            </div>
+            <div class="nav-item" data-page="library">
+                <i class="fas fa-gamepad"></i>
+                <span>Biblioteca</span>
+            </div>
+            <div class="nav-item" data-page="search" onclick="switchPage('search')">
+                <i class="fas fa-search"></i>
+                <span>Pesquisar</span>
+            </div>
+            <div class="nav-item" data-page="config" onclick="switchPage('config')">
+                <i class="fas fa-cog"></i>
+                <span>Config</span>
+            </div>
+        </nav>
+
+        <dialog id="downloadSettingsDialog" class="download-settings-dialog">
+            <div class="download-settings-content">
+                <div class="download-settings-header">
+                    <h2>Fontes de Download</h2>
+                    <button class="download-settings-close" onclick="closeDownloadSettingsDialog()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="cloud-sources">
+                    <input type="text" id="cloudSourceInput" placeholder="Cole a URL da fonte de nuvem">
+                    <button class="add-source-btn" onclick="addCloudSource()">Adicionar</button>
+                </div>
+                <div id="cloudSourcesList" class="cloud-sources-list">
+                    <!-- Cloud sources will be listed here -->
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="downloadDialog" class="download-dialog">
+            <div class="download-dialog-content">
+                <button class="download-dialog-close" onclick="closeDownloadDialog()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2 id="downloadGameTitle"></h2>
+                <div id="downloadGameInfo" class="download-game-info"></div>
+                <div id="downloadSources" class="download-sources"></div>
+            </div>
+        </dialog>
+
+        <dialog id="downloadDetailDialog" class="download-detail-dialog">
+            <div class="download-detail-content">
+                <button class="download-detail-close" onclick="closeDownloadDetailDialog()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2 id="downloadDetailTitle">Detalhes do Download</h2>
+                <div id="downloadDetailInfo" class="download-detail-info"></div>
+            </div>
+        </dialog>
+
+        <script src="app.js"></script>
     </div>
-
-    <button id="add-source-btn">Adicionar Fonte</button>
-
-    <div id="sources-container"></div>
-
-    <div id="dialog-overlay"></div>
-    <div id="dialog">
-        <h3>Adicionar Fonte</h3>
-        <p>Eu não sou responsável por qualquer conteúdo adicionado pelos usuários. Para adicionar uma fonte, informe a URL no grupo do whatsapp.</p>
-        <button class="dialog-btn" onclick="window.location.href='https://chat.whatsapp.com/CXSrf49mzhXEKQsJzxvZ8H'">Ir para o WhatsApp</button>
-        <button class="dialog-btn close-btn" id="close-dialog-btn">Fechar</button>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const sourcesContainer = document.getElementById('sources-container');
-        const searchInput = document.getElementById('search-input');
-        const addSourceBtn = document.getElementById('add-source-btn');
-        const dialog = document.getElementById('dialog');
-        const dialogOverlay = document.getElementById('dialog-overlay');
-        const closeDialogBtn = document.getElementById('close-dialog-btn');
-
-        // Exemplo de dados JSON (substitua pela URL do seu JSON)
-        const jsonUrl = 'https://raw.githubusercontent.com/DEYVIDYT/LdGames/main/Exemplo.json';
-
-        let sourcesData = [];
-
-        // Função para copiar o link
-        function copyToClipboard(link) {
-            navigator.clipboard.writeText(link).then(() => {
-                alert('Link copiado para a área de transferência!');
-            }).catch(err => {
-                console.error('Erro ao copiar o link: ', err);
-            });
-        }
-
-        // Função para renderizar as fontes
-        function renderSources(data) {
-            sourcesContainer.innerHTML = '';
-            data.forEach(source => {
-                const sourceDiv = document.createElement('div');
-                sourceDiv.className = 'source';
-
-                const nameElement = document.createElement('h2');
-                nameElement.textContent = source.name;
-
-                const descriptionElement = document.createElement('p');
-                descriptionElement.textContent = source.description;
-
-                const copyButton = document.createElement('button');
-                copyButton.className = 'copy-btn';
-                copyButton.textContent = 'Copiar Link';
-                copyButton.addEventListener('click', () => copyToClipboard(source.link));
-
-                sourceDiv.appendChild(nameElement);
-                sourceDiv.appendChild(descriptionElement);
-                sourceDiv.appendChild(copyButton);
-
-                sourcesContainer.appendChild(sourceDiv);
-            });
-        }
-
-        // Carregar dados do JSON
-        fetch(jsonUrl)
-            .then(response => response.json())
-            .then(data => {
-                sourcesData = data;
-                renderSources(sourcesData);
-            })
-            .catch(error => console.error('Erro ao carregar os dados: ', error));
-
-        // Evento de input para pesquisa
-        searchInput.addEventListener('input', (event) => {
-            const query = event.target.value.toLowerCase();
-            const filteredData = sourcesData.filter(source => source.name.toLowerCase().includes(query));
-            renderSources(filteredData);
-        });
-
-        // Evento para abrir o diálogo
-        addSourceBtn.addEventListener('click', () => {
-            dialog.style.display = 'block';
-            dialogOverlay.style.display = 'block';
-        });
-
-        // Evento para fechar o diálogo
-        closeDialogBtn.addEventListener('click', () => {
-            dialog.style.display = 'none';
-            dialogOverlay.style.display = 'none';
-        });
-
-        // Fechar o diálogo ao clicar fora dele
-        dialogOverlay.addEventListener('click', () => {
-            dialog.style.display = 'none';
-            dialogOverlay.style.display = 'none';
-        });
-    });
-</script>
-
 </body>
 </html>
