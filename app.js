@@ -5,7 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     fetchGames();
     loadCloudSources();
-    handleSharedGamePage();
+    
+    // Check for shared game link
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedGameTitle = urlParams.get('game');
+    
+    if (sharedGameTitle) {
+        searchAndShowSharedGame(decodeURIComponent(sharedGameTitle));
+    }
 });
 
 function checkTermsAcceptance() {
@@ -234,80 +241,64 @@ function switchPage(page) {
 let currentYouTubePlayer = null;
 
 function showGameDetails(game) {
-    const existingShowGameDetails = function(game) {
-        const gameDetailsPage = document.getElementById('gameDetailsPage');
-        const gameDetailsContent = document.getElementById('gameDetailsContent');
-        const gameDetailsTitle = document.getElementById('gameDetailsTitle');
-
-        // Reset any existing YouTube player
-        if (currentYouTubePlayer) {
-            currentYouTubePlayer.destroy();
-            currentYouTubePlayer = null;
-        }
-
-        gameDetailsTitle.textContent = game.title;
-
-        let mediaItems = '';
-
-        if (game.video_url) {
-            // Extract YouTube video ID
-            const videoId = extractYouTubeVideoId(game.video_url);
-            
-            if (videoId) {
-                mediaItems += `
-                    <div class="media-item video-container">
-                        <div id="youtube-player"></div>
-                    </div>
-                `;
-            }
-        }
-
-        if (game.screenshots && game.screenshots.length > 0) {
-            game.screenshots.forEach(screenshot => {
-                mediaItems += `
-                    <div class="media-item">
-                        <img src="${screenshot}" alt="Screenshot">
-                    </div>
-                `;
-            });
-        }
-
-        gameDetailsContent.innerHTML = `
-            <img class="game-banner" src="${game.banner_url || game.image_url}" alt="${game.title}">
-            <h1 class="game-title">${game.title}</h1>
-            <div class="game-release-date">${game.release_date || 'Data não informada'}</div>
-            <button class="download-button" onclick="handleCloudDownload('${game.title}')">Download</button>
-            <div class="game-description">${game.description || 'Sem descrição disponível'}</div>
-            <div class="media-section">
-                ${mediaItems}
-            </div>
-        `;
-
-        // Load YouTube player if video is available
-        if (game.video_url) {
-            const videoId = extractYouTubeVideoId(game.video_url);
-            if (videoId) {
-                loadYouTubePlayer(videoId);
-            }
-        }
-
-        switchPage('gameDetails');
-    };
-
-    existingShowGameDetails(game);
-
-    // Add share button to game details
+    const gameDetailsPage = document.getElementById('gameDetailsPage');
     const gameDetailsContent = document.getElementById('gameDetailsContent');
-    const shareButton = document.createElement('button');
-    shareButton.className = 'share-game-button';
-    shareButton.innerHTML = `<i class="fas fa-share-alt"></i> Compartilhar`;
-    shareButton.addEventListener('click', () => shareGame(game));
-    
-    // Insert the share button after the download button
-    const downloadButton = gameDetailsContent.querySelector('.download-button');
-    if (downloadButton) {
-        downloadButton.after(shareButton);
+    const gameDetailsTitle = document.getElementById('gameDetailsTitle');
+
+    // Reset any existing YouTube player
+    if (currentYouTubePlayer) {
+        currentYouTubePlayer.destroy();
+        currentYouTubePlayer = null;
     }
+
+    gameDetailsTitle.textContent = game.title;
+
+    let mediaItems = '';
+
+    if (game.video_url) {
+        // Extract YouTube video ID
+        const videoId = extractYouTubeVideoId(game.video_url);
+        
+        if (videoId) {
+            mediaItems += `
+                <div class="media-item video-container">
+                    <div id="youtube-player"></div>
+                </div>
+            `;
+        }
+    }
+
+    if (game.screenshots && game.screenshots.length > 0) {
+        game.screenshots.forEach(screenshot => {
+            mediaItems += `
+                <div class="media-item">
+                    <img src="${screenshot}" alt="Screenshot">
+                </div>
+            `;
+        });
+    }
+
+    gameDetailsContent.innerHTML = `
+        <img class="game-banner" src="${game.banner_url || game.image_url}" alt="${game.title}">
+        <h1 class="game-title">${game.title}</h1>
+        <div class="game-release-date">${game.release_date || 'Data não informada'}</div>
+        <button class="download-button" onclick="handleCloudDownload('${game.title}')">Download</button>
+        <button class="share-button" onclick="shareGame()">Compartilhar</button>
+        <div class="game-description">${game.description || 'Sem descrição disponível'}</div>
+        <div class="media-section">
+            ${mediaItems}
+        </div>
+    `;
+
+    // Load YouTube player if video is available
+    if (game.video_url) {
+        const videoId = extractYouTubeVideoId(game.video_url);
+        if (videoId) {
+            loadYouTubePlayer(videoId);
+        }
+    }
+
+    switchPage('gameDetails');
 }
 
 function extractYouTubeVideoId(url) {
@@ -644,153 +635,67 @@ function downloadSourceCode() {
     window.open(sourceCodeUrl, '_blank');
 }
 
-async function generateShareableGameLink(game) {
-    try {
-        // Generate a unique identifier for the shared game
-        const shareId = generateUniqueShareId();
-        
-        // Prepare game data for sharing
-        const shareData = {
-            id: shareId,
-            title: game.title,
-            image_url: game.banner_url || game.image_url,
-            description: game.description,
-            video_url: game.video_url,
-            release_date: game.release_date,
-            screenshots: game.screenshots || []
-        };
-
-        // Save share data to a temporary storage or backend
-        await saveShareData(shareId, shareData);
-
-        // Generate the full shareable URL
-        const shareUrl = `${window.location.origin}/share/${shareId}`;
-
-        return shareUrl;
-    } catch (error) {
-        console.error('Error generating shareable link:', error);
-        return null;
-    }
-}
-
-// Function to generate a unique share ID
-function generateUniqueShareId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
-// Placeholder function to save share data 
-// In a real-world scenario, this would interact with a backend service
-async function saveShareData(shareId, shareData) {
-    // For now, we'll use localStorage as a simple storage mechanism
-    localStorage.setItem(`share_${shareId}`, JSON.stringify(shareData));
-}
-
-// Function to handle sharing a game
-async function shareGame(game) {
-    try {
-        // Generate shareable link
-        const shareUrl = await generateShareableGameLink(game);
-
-        if (!shareUrl) {
-            alert('Erro ao gerar link de compartilhamento');
-            return;
-        }
-
-        // Use Web Share API if available
-        if (navigator.share) {
-            await navigator.share({
-                title: `Compartilhar ${game.title}`,
-                text: `Confira o jogo ${game.title} no LdGames`,
-                url: shareUrl
-            });
-        } else {
-            // Fallback for browsers not supporting Web Share API
-            copyToClipboard(shareUrl);
-            alert('Link de compartilhamento copiado para a área de transferência');
-        }
-    } catch (error) {
-        console.error('Erro ao compartilhar jogo:', error);
-        alert('Não foi possível compartilhar o jogo');
-    }
-}
-
-// Function to copy text to clipboard
-function copyToClipboard(text) {
-    const tempInput = document.createElement('input');
-    tempInput.value = text;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
-}
-
-// Function to handle shared game page
-function handleSharedGamePage() {
-    // Check if we're on a shared game page
-    const pathMatch = window.location.pathname.match(/^\/share\/(.+)$/);
-    if (pathMatch) {
-        const shareId = pathMatch[1];
-        const sharedGameData = localStorage.getItem(`share_${shareId}`);
-        
-        if (sharedGameData) {
-            const game = JSON.parse(sharedGameData);
-            displaySharedGame(game);
-        } else {
-            alert('Link de compartilhamento inválido ou expirado');
-        }
-    }
-}
-
-// Function to display a shared game
-function displaySharedGame(game) {
-    // Similar to showGameDetails, but for shared games
-    const gameDetailsPage = document.getElementById('gameDetailsPage');
-    const gameDetailsContent = document.getElementById('gameDetailsContent');
-    const gameDetailsTitle = document.getElementById('gameDetailsTitle');
-
-    gameDetailsTitle.textContent = game.title;
-
-    let mediaItems = '';
-
-    if (game.video_url) {
-        const videoId = extractYouTubeVideoId(game.video_url);
-        
-        if (videoId) {
-            mediaItems += `
-                <div class="media-item video-container">
-                    <div id="youtube-player"></div>
-                </div>
-            `;
-        }
-    }
-
-    if (game.screenshots && game.screenshots.length > 0) {
-        game.screenshots.forEach(screenshot => {
-            mediaItems += `
-                <div class="media-item">
-                    <img src="${screenshot}" alt="Screenshot">
-                </div>
-            `;
-        });
-    }
-
-    gameDetailsContent.innerHTML = `
-        <img class="game-banner" src="${game.image_url}" alt="${game.title}">
-        <h1 class="game-title">${game.title}</h1>
-        <div class="game-release-date">${game.release_date || 'Data não informada'}</div>
-        <div class="game-description">${game.description || 'Sem descrição disponível'}</div>
-        <div class="media-section">
-            ${mediaItems}
+function shareGame() {
+    const gameDetailsTitle = document.getElementById('gameDetailsTitle').textContent;
+    const shareUrl = generateShareLink(gameDetailsTitle);
+    
+    // Create a dialog for sharing
+    const shareDialog = document.createElement('dialog');
+    shareDialog.classList.add('share-dialog');
+    shareDialog.innerHTML = `
+        <div class="share-dialog-content">
+            <h3>Compartilhar Jogo</h3>
+            <input type="text" id="shareUrlInput" readonly value="${shareUrl}">
+            <div class="share-actions">
+                <button onclick="copyShareLink()">Copiar Link</button>
+                <button onclick="shareNatively('${shareUrl}')">Compartilhar</button>
+                <button onclick="this.closest('dialog').close()">Fechar</button>
+            </div>
         </div>
     `;
+    
+    document.body.appendChild(shareDialog);
+    shareDialog.showModal();
+}
 
-    // Load YouTube player if video is available
-    if (game.video_url) {
-        const videoId = extractYouTubeVideoId(game.video_url);
-        if (videoId) {
-            loadYouTubePlayer(videoId);
-        }
+function generateShareLink(gameTitle) {
+    const baseUrl = 'https://deyvidyt.github.io/LdGamesCloud/index.html';
+    const encodedTitle = encodeURIComponent(gameTitle);
+    return `${baseUrl}?game=${encodedTitle}`;
+}
+
+function copyShareLink() {
+    const shareUrlInput = document.getElementById('shareUrlInput');
+    shareUrlInput.select();
+    document.execCommand('copy');
+    alert('Link copiado com sucesso!');
+}
+
+function shareNatively(url) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Compartilhar Jogo - LdGames',
+            text: 'Confira este jogo no LdGames!',
+            url: url
+        }).catch(console.error);
+    } else {
+        alert('Compartilhamento não suportado neste dispositivo.');
     }
+}
 
-    switchPage('gameDetails');
+async function searchAndShowSharedGame(gameTitle) {
+    try {
+        const response = await fetch(`${apiUrl}?name=${encodeURIComponent(gameTitle)}`);
+        const games = await response.json();
+        
+        if (games.length > 0) {
+            // Show the first matching game
+            showGameDetails(games[0]);
+        } else {
+            alert('Jogo não encontrado');
+        }
+    } catch (error) {
+        console.error("Erro ao buscar jogo compartilhado:", error);
+        alert('Erro ao buscar jogo compartilhado');
+    }
 }
