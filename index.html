@@ -8,6 +8,29 @@
 </head>
 <body>
     <div class="app-container">
+        <!-- Terms of Use Dialog -->
+        <dialog id="termsDialog" class="terms-dialog">
+            <div class="terms-content">
+                <h2>Termos de Uso</h2>
+                <div class="terms-text">
+                    <p>Este aplicativo foi desenvolvido para facilitar a visualização de jogos de PC, oferecendo aos usuários uma interface para explorar títulos disponíveis. Ele não inclui nem hospeda links de download de jogos e não incentiva práticas ilegais de pirataria. A funcionalidade de "Cloud" permite que os usuários adicionem fontes de backup para jogos que eles já possuem legalmente.</p>
+
+                    <h3>Uso Permitido:</h3>
+                    <p>Este aplicativo deve ser utilizado exclusivamente para fins legais, tais como a organização de backups de jogos que o usuário adquiriu por meios legítimos. É proibido o uso do aplicativo para distribuição ou aquisição de cópias não autorizadas de qualquer software, o que configura violação de direitos autorais.</p>
+
+                    <h3>Isenção de Responsabilidade:</h3>
+                    <p>A responsabilidade pelo uso do aplicativo recai inteiramente sobre o usuário. A equipe de desenvolvimento não se responsabiliza por qualquer uso inadequado ou contrário à legislação vigente.</p>
+
+                    <h3>Termo de Concordância:</h3>
+                    <p>Ao utilizar o aplicativo, você concorda e declara que respeitará este Termo de Uso, utilizando o aplicativo apenas para gerenciamento de cópias pessoais de jogos que já possui.</p>
+                </div>
+                <div class="terms-actions">
+                    <button id="rejectTermsBtn" class="reject-terms-btn">Rejeitar</button>
+                    <button id="acceptTermsBtn" class="accept-terms-btn">Aceitar</button>
+                </div>
+            </div>
+        </dialog>
+
         <header>
             <div class="header-content">
                 <div class="user-profile">
@@ -161,7 +184,8 @@
             </div>
         </dialog>
 
-        <script src="app.js"></script>
     </div>
+    <script src="https://www.youtube.com/iframe_api" async defer></script>
+    <script src="app.js"></script>
 </body>
 </html>

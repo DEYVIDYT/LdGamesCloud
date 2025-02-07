@@ -1,10 +1,39 @@
 const apiUrl = "https://ldgames.x10.mx/Games.php";
 
 document.addEventListener('DOMContentLoaded', () => {
+    checkTermsAcceptance();
     setupEventListeners();
     fetchGames();
     loadCloudSources();
+    handleSharedGamePage();
 });
+
+function checkTermsAcceptance() {
+    const termsAccepted = localStorage.getItem('termsAccepted');
+    const termsDialog = document.getElementById('termsDialog');
+    
+    if (!termsAccepted) {
+        termsDialog.showModal();
+        setupTermsDialogListeners();
+    }
+}
+
+function setupTermsDialogListeners() {
+    const acceptTermsBtn = document.getElementById('acceptTermsBtn');
+    const rejectTermsBtn = document.getElementById('rejectTermsBtn');
+    const termsDialog = document.getElementById('termsDialog');
+
+    acceptTermsBtn.addEventListener('click', () => {
+        localStorage.setItem('termsAccepted', 'true');
+        termsDialog.close();
+    });
+
+    rejectTermsBtn.addEventListener('click', () => {
+        // Close the browser window or redirect to an external page
+        window.close(); // This might not work in all browsers
+        // Alternative: window.location.href = 'about:blank';
+    });
+}
 
 function setupEventListeners() {
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -177,6 +206,11 @@ async function searchGames(event) {
 }
 
 function switchPage(page) {
+    // Destroy YouTube player if leaving game details page
+    if (document.getElementById('gameDetailsPage').classList.contains('active')) {
+        destroyYouTubePlayer();
+    }
+
     // Hide all pages
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
@@ -197,45 +231,133 @@ function switchPage(page) {
     });
 }
 
+let currentYouTubePlayer = null;
+
 function showGameDetails(game) {
-    const gameDetailsPage = document.getElementById('gameDetailsPage');
-    const gameDetailsContent = document.getElementById('gameDetailsContent');
-    const gameDetailsTitle = document.getElementById('gameDetailsTitle');
+    const existingShowGameDetails = function(game) {
+        const gameDetailsPage = document.getElementById('gameDetailsPage');
+        const gameDetailsContent = document.getElementById('gameDetailsContent');
+        const gameDetailsTitle = document.getElementById('gameDetailsTitle');
 
-    gameDetailsTitle.textContent = game.title;
+        // Reset any existing YouTube player
+        if (currentYouTubePlayer) {
+            currentYouTubePlayer.destroy();
+            currentYouTubePlayer = null;
+        }
 
-    let mediaItems = '';
+        gameDetailsTitle.textContent = game.title;
 
-    if (game.video_url) {
-        mediaItems += `
-            <div class="media-item">
-                <iframe src="${game.video_url}" allowfullscreen></iframe>
+        let mediaItems = '';
+
+        if (game.video_url) {
+            // Extract YouTube video ID
+            const videoId = extractYouTubeVideoId(game.video_url);
+            
+            if (videoId) {
+                mediaItems += `
+                    <div class="media-item video-container">
+                        <div id="youtube-player"></div>
+                    </div>
+                `;
+            }
+        }
+
+        if (game.screenshots && game.screenshots.length > 0) {
+            game.screenshots.forEach(screenshot => {
+                mediaItems += `
+                    <div class="media-item">
+                        <img src="${screenshot}" alt="Screenshot">
+                    </div>
+                `;
+            });
+        }
+
+        gameDetailsContent.innerHTML = `
+            <img class="game-banner" src="${game.banner_url || game.image_url}" alt="${game.title}">
+            <h1 class="game-title">${game.title}</h1>
+            <div class="game-release-date">${game.release_date || 'Data não informada'}</div>
+            <button class="download-button" onclick="handleCloudDownload('${game.title}')">Download</button>
+            <div class="game-description">${game.description || 'Sem descrição disponível'}</div>
+            <div class="media-section">
+                ${mediaItems}
             </div>
         `;
+
+        // Load YouTube player if video is available
+        if (game.video_url) {
+            const videoId = extractYouTubeVideoId(game.video_url);
+            if (videoId) {
+                loadYouTubePlayer(videoId);
+            }
+        }
+
+        switchPage('gameDetails');
+    };
+
+    existingShowGameDetails(game);
+
+    // Add share button to game details
+    const gameDetailsContent = document.getElementById('gameDetailsContent');
+    const shareButton = document.createElement('button');
+    shareButton.className = 'share-game-button';
+    shareButton.innerHTML = `<i class="fas fa-share-alt"></i> Compartilhar`;
+    shareButton.addEventListener('click', () => shareGame(game));
+    
+    // Insert the share button after the download button
+    const downloadButton = gameDetailsContent.querySelector('.download-button');
+    if (downloadButton) {
+        downloadButton.after(shareButton);
     }
+}
 
-    if (game.screenshots && game.screenshots.length > 0) {
-        game.screenshots.forEach(screenshot => {
-            mediaItems += `
-                <div class="media-item">
-                    <img src="${screenshot}" alt="Screenshot">
-                </div>
-            `;
-        });
+function extractYouTubeVideoId(url) {
+    // Various YouTube URL formats
+    const patterns = [
+        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+        /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) {
+            return match[1];
+        }
     }
+    return null;
+}
 
-    gameDetailsContent.innerHTML = `
-        <img class="game-banner" src="${game.banner_url || game.image_url}" alt="${game.title}">
-        <h1 class="game-title">${game.title}</h1>
-        <div class="game-release-date">${game.release_date || 'Data não informada'}</div>
-        <button class="download-button" onclick="handleCloudDownload('${game.title}')">Download</button>
-        <div class="game-description">${game.description || 'Sem descrição disponível'}</div>
-        <div class="media-section">
-            ${mediaItems}
-        </div>
-    `;
+function loadYouTubePlayer(videoId) {
+    // Load YouTube IFrame Player API
+    if (typeof YT === 'undefined' || !YT.loaded) {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    switchPage('gameDetails');
+        window.onYouTubeIframeAPIReady = () => {
+            createYouTubePlayer(videoId);
+        };
+    } else {
+        createYouTubePlayer(videoId);
+    }
+}
+
+function createYouTubePlayer(videoId) {
+    currentYouTubePlayer = new YT.Player('youtube-player', {
+        height: '360',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+            'playsinline': 1
+        }
+    });
+}
+
+function destroyYouTubePlayer() {
+    if (currentYouTubePlayer) {
+        currentYouTubePlayer.destroy();
+        currentYouTubePlayer = null;
+    }
 }
 
 async function searchGamesAndShowPage(searchTerm) {
@@ -520,4 +642,155 @@ function closeDownloadDialog() {
 function downloadSourceCode() {
     const sourceCodeUrl = 'https://github.com/DEYVIDYT/LdGamesCloud/archive/refs/heads/main.zip';
     window.open(sourceCodeUrl, '_blank');
+}
+
+async function generateShareableGameLink(game) {
+    try {
+        // Generate a unique identifier for the shared game
+        const shareId = generateUniqueShareId();
+        
+        // Prepare game data for sharing
+        const shareData = {
+            id: shareId,
+            title: game.title,
+            image_url: game.banner_url || game.image_url,
+            description: game.description,
+            video_url: game.video_url,
+            release_date: game.release_date,
+            screenshots: game.screenshots || []
+        };
+
+        // Save share data to a temporary storage or backend
+        await saveShareData(shareId, shareData);
+
+        // Generate the full shareable URL
+        const shareUrl = `${window.location.origin}/share/${shareId}`;
+
+        return shareUrl;
+    } catch (error) {
+        console.error('Error generating shareable link:', error);
+        return null;
+    }
+}
+
+// Function to generate a unique share ID
+function generateUniqueShareId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+// Placeholder function to save share data 
+// In a real-world scenario, this would interact with a backend service
+async function saveShareData(shareId, shareData) {
+    // For now, we'll use localStorage as a simple storage mechanism
+    localStorage.setItem(`share_${shareId}`, JSON.stringify(shareData));
+}
+
+// Function to handle sharing a game
+async function shareGame(game) {
+    try {
+        // Generate shareable link
+        const shareUrl = await generateShareableGameLink(game);
+
+        if (!shareUrl) {
+            alert('Erro ao gerar link de compartilhamento');
+            return;
+        }
+
+        // Use Web Share API if available
+        if (navigator.share) {
+            await navigator.share({
+                title: `Compartilhar ${game.title}`,
+                text: `Confira o jogo ${game.title} no LdGames`,
+                url: shareUrl
+            });
+        } else {
+            // Fallback for browsers not supporting Web Share API
+            copyToClipboard(shareUrl);
+            alert('Link de compartilhamento copiado para a área de transferência');
+        }
+    } catch (error) {
+        console.error('Erro ao compartilhar jogo:', error);
+        alert('Não foi possível compartilhar o jogo');
+    }
+}
+
+// Function to copy text to clipboard
+function copyToClipboard(text) {
+    const tempInput = document.createElement('input');
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+}
+
+// Function to handle shared game page
+function handleSharedGamePage() {
+    // Check if we're on a shared game page
+    const pathMatch = window.location.pathname.match(/^\/share\/(.+)$/);
+    if (pathMatch) {
+        const shareId = pathMatch[1];
+        const sharedGameData = localStorage.getItem(`share_${shareId}`);
+        
+        if (sharedGameData) {
+            const game = JSON.parse(sharedGameData);
+            displaySharedGame(game);
+        } else {
+            alert('Link de compartilhamento inválido ou expirado');
+        }
+    }
+}
+
+// Function to display a shared game
+function displaySharedGame(game) {
+    // Similar to showGameDetails, but for shared games
+    const gameDetailsPage = document.getElementById('gameDetailsPage');
+    const gameDetailsContent = document.getElementById('gameDetailsContent');
+    const gameDetailsTitle = document.getElementById('gameDetailsTitle');
+
+    gameDetailsTitle.textContent = game.title;
+
+    let mediaItems = '';
+
+    if (game.video_url) {
+        const videoId = extractYouTubeVideoId(game.video_url);
+        
+        if (videoId) {
+            mediaItems += `
+                <div class="media-item video-container">
+                    <div id="youtube-player"></div>
+                </div>
+            `;
+        }
+    }
+
+    if (game.screenshots && game.screenshots.length > 0) {
+        game.screenshots.forEach(screenshot => {
+            mediaItems += `
+                <div class="media-item">
+                    <img src="${screenshot}" alt="Screenshot">
+                </div>
+            `;
+        });
+    }
+
+    gameDetailsContent.innerHTML = `
+        <img class="game-banner" src="${game.image_url}" alt="${game.title}">
+        <h1 class="game-title">${game.title}</h1>
+        <div class="game-release-date">${game.release_date || 'Data não informada'}</div>
+        <div class="game-description">${game.description || 'Sem descrição disponível'}</div>
+        <div class="media-section">
+            ${mediaItems}
+        </div>
+    `;
+
+    // Load YouTube player if video is available
+    if (game.video_url) {
+        const videoId = extractYouTubeVideoId(game.video_url);
+        if (videoId) {
+            loadYouTubePlayer(videoId);
+        }
+    }
+
+    switchPage('gameDetails');
 }

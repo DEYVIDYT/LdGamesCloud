@@ -24,6 +24,7 @@ body {
     max-width: 480px;
     margin: 0 auto;
     background-color: var(--primary-bg);
+    padding-bottom: 60px;
 }
 
 header {
@@ -162,6 +163,8 @@ header {
     display: flex;
     justify-content: space-around;
     padding: 10px 0;
+    z-index: 1000;
+    height: 60px;
 }
 
 .nav-item {
@@ -625,6 +628,8 @@ header {
 #pageContainer {
     position: relative;
     height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding-bottom: 60px;
 }
 
 .page {
@@ -636,6 +641,7 @@ header {
     background-color: var(--primary-bg);
     display: none;
     overflow-y: auto;
+    padding-bottom: 80px;
 }
 
 .page.active {
@@ -727,4 +733,99 @@ header {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.terms-dialog {
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 15px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.terms-dialog::backdrop {
+    background: rgba(0,0,0,0.7);
+}
+
+.terms-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.terms-text {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: justify;
+}
+
+.terms-text h3 {
+    color: var(--accent-color);
+    margin-top: 10px;
+}
+
+.terms-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.reject-terms-btn, .accept-terms-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.reject-terms-btn {
+    background-color: #ff4444;
+    color: white;
+}
+
+.accept-terms-btn {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.reject-terms-btn:hover {
+    background-color: #cc0000;
+}
+
+.accept-terms-btn:hover {
+    background-color: #45a049;
+}
+
+.share-game-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.share-game-button:hover {
+    background-color: #2980b9;
+}
+
+.share-game-button i {
+    font-size: 18px;
 }
