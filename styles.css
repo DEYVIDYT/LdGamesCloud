@@ -867,3 +867,140 @@ header {
 .share-actions button:hover {
     background-color: #45a049;
 }
+
+.source-details-header {
+    background-color: var(--secondary-bg);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+}
+
+.source-details-header .source-url {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.source-details-header i {
+    color: var(--accent-color);
+}
+
+.source-game-card {
+    display: flex;
+    background-color: var(--secondary-bg);
+    margin-bottom: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.source-game-card:hover {
+    transform: scale(1.03);
+}
+
+.source-game-card img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}
+
+.source-game-card .game-info {
+    flex-grow: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.source-game-card .game-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.source-game-card .game-details {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.source-game-card .game-size,
+.source-game-card .game-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.source-search-container {
+    padding: 15px;
+    background-color: var(--secondary-bg);
+}
+
+.source-search-container input {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--primary-bg);
+    border: none;
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 16px;
+}
+
+.source-games-list {
+    padding: 15px;
+}
+
+.source-game-item {
+    background-color: var(--secondary-bg);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.source-game-item:hover {
+    background-color: var(--card-bg);
+}
+
+.source-game-details {
+    flex-grow: 1;
+}
+
+.source-game-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.source-game-metadata {
+    display: flex;
+    gap: 15px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.source-game-download {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.source-game-download:hover {
+    background-color: #45a049;
+}

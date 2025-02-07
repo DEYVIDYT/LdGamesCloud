@@ -9,9 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check for shared game link
     const urlParams = new URLSearchParams(window.location.search);
     const sharedGameTitle = urlParams.get('game');
+    const sharedGameReleaseDate = urlParams.get('release');
     
     if (sharedGameTitle) {
-        searchAndShowSharedGame(decodeURIComponent(sharedGameTitle));
+        searchAndShowSharedGame(
+            decodeURIComponent(sharedGameTitle), 
+            decodeURIComponent(sharedGameReleaseDate || '')
+        );
     }
 });
 
@@ -100,6 +104,7 @@ function renderCloudSources(sources) {
                 <i class="fas fa-trash"></i>
             </button>
         `;
+        sourceItem.addEventListener('click', () => searchSourceGames(source));
         cloudSourcesList.appendChild(sourceItem);
     });
 }
@@ -637,7 +642,8 @@ function downloadSourceCode() {
 
 function shareGame() {
     const gameDetailsTitle = document.getElementById('gameDetailsTitle').textContent;
-    const shareUrl = generateShareLink(gameDetailsTitle);
+    const game = getCurrentGameDetails(); // A new function to get current game's full details
+    const shareUrl = generateShareLink(game);
     
     // Create a dialog for sharing
     const shareDialog = document.createElement('dialog');
@@ -658,10 +664,46 @@ function shareGame() {
     shareDialog.showModal();
 }
 
-function generateShareLink(gameTitle) {
+function generateShareLink(game) {
     const baseUrl = 'https://deyvidyt.github.io/LdGamesCloud/index.html';
-    const encodedTitle = encodeURIComponent(gameTitle);
-    return `${baseUrl}?game=${encodedTitle}`;
+    const encodedTitle = encodeURIComponent(game.title);
+    const encodedReleaseDate = encodeURIComponent(game.release_date || '');
+    return `${baseUrl}?game=${encodedTitle}&release=${encodedReleaseDate}`;
+}
+
+function getCurrentGameDetails() {
+    // This function should return the current game's full details
+    // You'll need to modify your existing code to track the current game's full details
+    const gameDetailsTitle = document.getElementById('gameDetailsTitle').textContent;
+    const gameDetailsContent = document.getElementById('gameDetailsContent');
+    
+    return {
+        title: gameDetailsTitle,
+        release_date: gameDetailsContent.querySelector('.game-release-date')?.textContent || ''
+    };
+}
+
+async function searchAndShowSharedGame(gameTitle, releaseDate) {
+    try {
+        const response = await fetch(`${apiUrl}?name=${encodeURIComponent(gameTitle)}`);
+        const games = await response.json();
+        
+        // Filter games that match both title and release date
+        const matchingGames = games.filter(game => 
+            game.title === gameTitle && 
+            (releaseDate === '' || game.release_date === releaseDate)
+        );
+        
+        if (matchingGames.length > 0) {
+            // Show the first matching game
+            showGameDetails(matchingGames[0]);
+        } else {
+            alert('Jogo não encontrado');
+        }
+    } catch (error) {
+        console.error("Erro ao buscar jogo compartilhado:", error);
+        alert('Erro ao buscar jogo compartilhado');
+    }
 }
 
 function copyShareLink() {
@@ -683,19 +725,157 @@ function shareNatively(url) {
     }
 }
 
-async function searchAndShowSharedGame(gameTitle) {
+function displaySourceGames(downloads, sourceUrl) {
+    const sourceSearchResults = document.getElementById('sourceSearchResults');
+    sourceSearchResults.innerHTML = '';
+
+    if (downloads.length === 0) {
+        sourceSearchResults.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>Nenhum jogo encontrado nesta fonte</p>
+            </div>
+        `;
+        return;
+    }
+
+    const sourceSearchInput = document.getElementById('sourceSearchInput');
+    sourceSearchInput.addEventListener('input', debounceSourceSearch(downloads, sourceUrl));
+
+    renderSourceGames(downloads, sourceUrl);
+}
+
+function renderSourceGames(downloads, sourceUrl, searchTerm = '') {
+    const sourceSearchResults = document.getElementById('sourceSearchResults');
+    sourceSearchResults.innerHTML = '';
+
+    const filteredDownloads = downloads.filter(download => 
+        !searchTerm || 
+        download.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (filteredDownloads.length === 0) {
+        sourceSearchResults.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>Nenhum jogo encontrado</p>
+            </div>
+        `;
+        return;
+    }
+
+    filteredDownloads.forEach(download => {
+        const gameItem = document.createElement('div');
+        gameItem.className = 'source-game-item';
+        gameItem.innerHTML = `
+            <div class="source-game-details">
+                <div class="source-game-title">${download.title}</div>
+                <div class="source-game-metadata">
+                    <span>
+                        <i class="fas fa-file"></i> ${download.fileSize || 'Tamanho não informado'}
+                    </span>
+                    <span>
+                        <i class="far fa-calendar-alt"></i> ${formatDate(download.uploadDate)}
+                    </span>
+                </div>
+            </div>
+            <button class="source-game-download" onclick="handleSourceGameDownload('${encodeURIComponent(JSON.stringify(download))}', '${sourceUrl}')">
+                <i class="fas fa-download"></i> Download
+            </button>
+        `;
+        sourceSearchResults.appendChild(gameItem);
+    });
+}
+
+function debounceSourceSearch(downloads, sourceUrl) {
+    let timeout;
+    return function(event) {
+        const searchTerm = event.target.value.trim();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            renderSourceGames(downloads, sourceUrl, searchTerm);
+        }, 300);
+    };
+}
+
+function handleSourceGameDownload(encodedDownload, sourceUrl) {
+    const download = JSON.parse(decodeURIComponent(encodedDownload));
+    const downloadDialog = document.getElementById('downloadDialog');
+    const downloadTitle = document.getElementById('downloadGameTitle');
+    const downloadSourcesContainer = document.getElementById('downloadSources');
+    
+    downloadTitle.textContent = download.title;
+    downloadSourcesContainer.innerHTML = `
+        <div class="download-source">
+            <div class="source-details">
+                <span class="source-name">${new URL(sourceUrl).hostname}</span>
+                <span class="upload-date">${formatDate(download.uploadDate)}</span>
+            </div>
+            <div class="download-links">
+                ${download.uris.map(uri => `
+                    <a href="${uri}" 
+                       class="download-button" 
+                       target="_blank"
+                       data-title="${download.title}"
+                       data-file-size="${download.fileSize}"
+                       data-upload-date="${download.uploadDate}"
+                       data-source-url="${new URL(sourceUrl).hostname}"
+                    >
+                        Download (${download.fileSize})
+                        <span class="download-site">${new URL(sourceUrl).hostname}</span>
+                    </a>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    setupDownloadButtonLongPress();
+    
+    downloadDialog.showModal();
+}
+
+async function searchSourceGames(sourceUrl) {
     try {
-        const response = await fetch(`${apiUrl}?name=${encodeURIComponent(gameTitle)}`);
-        const games = await response.json();
+        const sourceSearchResults = document.getElementById('sourceSearchResults');
+        const sourceSearchTitle = document.getElementById('sourceSearchTitle');
+        const sourceSearchDetails = document.getElementById('sourceSearchDetails');
         
-        if (games.length > 0) {
-            // Show the first matching game
-            showGameDetails(games[0]);
-        } else {
-            alert('Jogo não encontrado');
+        sourceSearchResults.innerHTML = `
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Buscando jogos da fonte...</p>
+            </div>
+        `;
+
+        sourceSearchTitle.textContent = 'Jogos da Fonte';
+        sourceSearchDetails.innerHTML = `
+            <div class="source-url">
+                <i class="fas fa-link"></i> ${sourceUrl}
+            </div>
+        `;
+
+        switchPage('sourceSearch');
+
+        const response = await fetch(sourceUrl);
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar jogos da fonte: ${response.status}`);
         }
+
+        const data = await response.json();
+
+        if (!data.downloads || !Array.isArray(data.downloads)) {
+            throw new Error('Formato de dados inválido');
+        }
+
+        displaySourceGames(data.downloads, sourceUrl);
     } catch (error) {
-        console.error("Erro ao buscar jogo compartilhado:", error);
-        alert('Erro ao buscar jogo compartilhado');
+        console.error('Erro ao buscar jogos da fonte:', error);
+        const sourceSearchResults = document.getElementById('sourceSearchResults');
+        sourceSearchResults.innerHTML = `
+            <div class="error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>${error.message}</p>
+            </div>
+        `;
     }
 }
