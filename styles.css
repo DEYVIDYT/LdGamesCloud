@@ -5,6 +5,13 @@
     --text-primary: #FFFFFF;
     --text-secondary: #A0A0A0;
     --card-bg: #1F2328;
+
+    /* Dynamic Theme Colors */
+    --dynamic-primary: #2C3E50;
+    --dynamic-secondary: #34495E;
+    --dynamic-accent: #27AE60;
+    --dynamic-gradient-1: linear-gradient(135deg, #2C3E50, #3498DB);
+    --dynamic-gradient-2: linear-gradient(45deg, #8E44AD, #3498DB);
 }
 
 * {
@@ -15,7 +22,11 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    background-color: var(--primary-bg);
+    background: var(--dynamic-gradient-1);
+    background-size: 400% 400%;
+    animation: dynamicBackgroundShift 15s ease infinite;
+    background-attachment: fixed;
+    transition: background 0.5s ease;
     color: var(--text-primary);
     line-height: 1.6;
 }
@@ -23,12 +34,18 @@ body {
 .app-container {
     max-width: 480px;
     margin: 0 auto;
-    background-color: var(--primary-bg);
+    background: rgba(26, 29, 34, 0.8);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     padding-bottom: 60px;
 }
 
 header {
-    background-color: var(--secondary-bg);
+    background: var(--dynamic-gradient-2);
+    color: white;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
     padding: 20px;
 }
 
@@ -77,6 +94,23 @@ header {
     position: relative;
     border-radius: 15px;
     overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.featured-game::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7));
+    z-index: 1;
+}
+
+.featured-game:hover {
+    transform: scale(1.02);
 }
 
 .featured-game img {
@@ -129,9 +163,17 @@ header {
 
 .game-card {
     flex: 0 0 150px;
-    background-color: var(--card-bg);
+    background: rgba(31, 35, 40, 0.7);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     overflow: hidden;
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
 .game-card img {
@@ -159,7 +201,9 @@ header {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: var(--secondary-bg);
+    background: rgba(26, 29, 34, 0.9);
+    backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-around;
     padding: 10px 0;
@@ -172,10 +216,16 @@ header {
     flex-direction: column;
     align-items: center;
     color: var(--text-secondary);
+    transition: color 0.3s ease, transform 0.2s ease;
 }
 
 .nav-item.active {
-    color: var(--accent-color);
+    transform: scale(1.1);
+    color: var(--dynamic-accent);
+}
+
+.nav-item:hover {
+    color: var(--dynamic-accent);
 }
 
 .nav-item i {
@@ -206,6 +256,12 @@ header {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@keyframes dynamicBackgroundShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .download-dialog {

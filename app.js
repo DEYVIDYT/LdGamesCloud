@@ -118,6 +118,14 @@ function removeCloudSource(index) {
 
 function loadCloudSources() {
     const cloudSources = JSON.parse(localStorage.getItem('cloudSources') || '[]');
+    
+    // Add the predefined cloud source if not already present
+    const preDefinedSource = 'https://raw.githubusercontent.com/DEYVIDYT/LdGamesCloud/refs/heads/main/SteamRip.json';
+    if (!cloudSources.includes(preDefinedSource)) {
+        cloudSources.push(preDefinedSource);
+        localStorage.setItem('cloudSources', JSON.stringify(cloudSources));
+    }
+    
     renderCloudSources(cloudSources);
 }
 
